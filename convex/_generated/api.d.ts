@@ -9,7 +9,11 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as habitLogs from "../habitLogs.js";
+import type * as habitStats from "../habitStats.js";
+import type * as habits from "../habits.js";
 import type * as http from "../http.js";
+import type * as scheduleCards from "../scheduleCards.js";
 import type * as tasks from "../tasks.js";
 
 import type {
@@ -20,7 +24,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  habitLogs: typeof habitLogs;
+  habitStats: typeof habitStats;
+  habits: typeof habits;
   http: typeof http;
+  scheduleCards: typeof scheduleCards;
   tasks: typeof tasks;
 }>;
 

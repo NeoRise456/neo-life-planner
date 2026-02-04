@@ -48,7 +48,7 @@ export default function LoginPage() {
   async function handleGithubSignIn() {
     const {error} = await authClient.signIn.social({
       provider: "github",
-      callbackURL: "/schedule"
+      callbackURL: "/habits"
     });
 
 
