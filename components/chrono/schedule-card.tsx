@@ -23,7 +23,7 @@ interface ScheduleCardProps {
 }
 
 export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
-  const { state, selectCard, deleteScheduleCard } = useChrono()
+  const { editMode, selectCard, deleteScheduleCard } = useChrono()
   const cardRef = useRef<HTMLDivElement>(null)
   
   const habit = useQuery(api.habits.getHabitById, { id: card.habitId as any })
@@ -44,8 +44,8 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
   const isTracked = habit?.isTracked ?? false
 
   const handleSelect = useCallback(() => {
-    selectCard(card.id)
-  }, [card.id, selectCard])
+    selectCard(card._id)
+  }, [card._id, selectCard])
 
   const handleToggle = useCallback(async () => {
     if (!habit || !isTracked || !isToday) return
@@ -59,9 +59,9 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
   const handleDelete = useCallback(
     (e: MouseEvent | KeyboardEvent) => {
       e.stopPropagation()
-      deleteScheduleCard(card.id)
+      deleteScheduleCard(card._id)
     },
-    [card.id, deleteScheduleCard]
+    [card._id, deleteScheduleCard]
   )
 
   const handleKeyDown = useCallback(
@@ -96,12 +96,12 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
       tabIndex={0}
       onClick={isTracked && isToday ? handleToggle : handleSelect}
       onKeyDown={handleKeyDown}
-      onMouseDown={state.editMode === "edit" ? undefined : undefined}
+      onMouseDown={editMode === "edit" ? undefined : undefined}
       className={cn(
         "absolute left-1 right-1 overflow-hidden transition-shadow duration-150",
         "flex flex-col justify-between select-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 outline-none",
-        state.editMode === "edit" ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+        editMode === "edit" ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isSelected && "ring-2 ring-foreground ring-offset-1 ring-offset-background z-10",
         isCompleted && isToday && "ring-2 ring-green-500"
       )}
@@ -112,7 +112,7 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
       }}
       aria-label={`${habit.name} from ${formatTime(card.startHour, card.startMinute)} to ${formatTime(endTime.hour, endTime.minute)}${isCompleted && isToday ? " - Completed" : ""}`}
       aria-selected={isSelected}
-      data-card-id={card.id}
+      data-card-id={card._id}
     >
       {/* Card content */}
       <div className="p-2 flex flex-col h-full text-white relative">
@@ -133,7 +133,7 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
               </p>
             )}
           </div>
-          {state.editMode === "edit" && (
+          {editMode === "edit" && (
             <button
               onClick={handleDelete}
               onKeyDown={(e) => {
@@ -156,7 +156,7 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
       </div>
 
       {/* View mode click indicator for tracked habits */}
-      {state.editMode === "view" && isTracked && isToday && (
+      {editMode === "view" && isTracked && isToday && (
         <div className="absolute inset-0 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
           {isCompleted ? (
             <Check className="size-8 text-white" />
@@ -167,7 +167,7 @@ export function ScheduleCard({ card, isSelected }: ScheduleCardProps) {
       )}
 
       {/* Edit mode handles */}
-      {state.editMode === "edit" && (
+      {editMode === "edit" && (
         <>
           {/* Vertical resize handle (bottom) */}
           <div

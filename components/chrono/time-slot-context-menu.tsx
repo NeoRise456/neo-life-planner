@@ -26,7 +26,7 @@ export function TimeSlotContextMenu({
   hour,
   minute = 0,
 }: TimeSlotContextMenuProps) {
-  const { editMode, addScheduleCard, scheduleCards } = useChrono()
+  const { editMode, addScheduleCard, habits } = useChrono()
 
   if (editMode !== "edit") {
     return <>{children}</>
@@ -41,18 +41,18 @@ export function TimeSlotContextMenu({
         </ContextMenuLabel>
         <ContextMenuSeparator />
         <ContextMenuLabel className="text-xs">Add Schedule Card</ContextMenuLabel>
-        {scheduleCards.map((masterCard) => (
+        {habits.map((habit) => (
           <ContextMenuItem
-            key={masterCard.id}
-            onClick={() => addScheduleCard(masterCard.id, day, hour, minute)}
+            key={habit._id}
+            onClick={() => addScheduleCard(habit._id, day, hour, minute)}
             className="flex items-center gap-2 cursor-pointer"
           >
             <div
               className="w-3 h-3 flex-shrink-0"
-              style={{ backgroundColor: masterCard.color }}
+              style={{ backgroundColor: habit.color }}
               aria-hidden="true"
             />
-            <span className="truncate">{masterCard.name}</span>
+            <span className="truncate">{habit.name}</span>
             <Plus className="size-3 ml-auto text-muted-foreground" aria-hidden="true" />
           </ContextMenuItem>
         ))}

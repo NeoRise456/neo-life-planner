@@ -20,6 +20,7 @@ import {
 
 // Context value
 interface ChronoContextValue {
+  habits: any[]
   scheduleCards: GeneratedScheduleCard[]
   selectedCardId: string | null
   editMode: EditMode
@@ -64,7 +65,8 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
 
       // Check for overlaps
       const hasOverlap = convexScheduleCards.some((existing) => {
-        const newCard: Omit<GeneratedScheduleCard, "_id"> = {
+        const newCard: GeneratedScheduleCard = {
+          _id: "new-card-temp",
           habitId: habit._id,
           userId: "",
           day,
@@ -72,7 +74,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
           startMinute,
           durationMinutes: habit.defaultDurationMinutes,
         }
-        return cardsOverlap(existing, newCard)
+        return cardsOverlap(existing as GeneratedScheduleCard, newCard)
       })
 
       if (hasOverlap) return
@@ -97,13 +99,13 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
 
       // Check for overlaps with other cards (not itself)
       const hasOverlap = convexScheduleCards.some(
-        (existing) => existing._id !== card._id && cardsOverlap(existing, cardWithClampedDuration)
+        (existing) => existing._id !== card._id && cardsOverlap(existing as GeneratedScheduleCard, cardWithClampedDuration)
       )
 
       if (hasOverlap) return
 
       await updateScheduleCardMutation({
-        id: card._id,
+        id: card._id as any,
         day: card.day,
         startHour: card.startHour,
         startMinute: card.startMinute,
@@ -115,7 +117,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
 
   const deleteScheduleCard = useCallback(
     async (cardId: string) => {
-      await deleteScheduleCardMutation({ id: cardId })
+      await deleteScheduleCardMutation({ id: cardId as any })
       if (selectedCardId === cardId) {
         setSelectedCardId(null)
       }
@@ -129,7 +131,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
       if (!card) return
 
       try {
-        await duplicateToDayMutation({ cardId: card.habitId, targetDay })
+        await duplicateToDayMutation({ cardId: card.habitId as any, targetDay })
       } catch (error) {
         // Card already exists
       }
@@ -139,14 +141,15 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
 
   const getCardsForDay = useCallback(
     (day: DayOfWeek) =>
-      convexScheduleCards
+      (convexScheduleCards as GeneratedScheduleCard[])
         .filter((card) => card.day === day)
         .sort((a, b) => a.startHour * 60 + a.startMinute - (b.startHour * 60 + b.startMinute)),
     [convexScheduleCards]
   )
 
   const value: ChronoContextValue = {
-    scheduleCards: convexScheduleCards,
+    habits,
+    scheduleCards: convexScheduleCards as GeneratedScheduleCard[],
     selectedCardId,
     editMode,
     dragState,

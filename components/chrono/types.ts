@@ -33,28 +33,21 @@ export const SCHEDULE_CONFIG = {
   SLOT_HEIGHT_PX: 60, // Height per hour in pixels
 } as const
 
-// Master Card (template in the palette)
-export interface MasterCard {
-  id: string
-  name: string
-  color: string
-  defaultDurationMinutes: number
-}
-
 // Schedule Card Instance (placed on the timetable)
 export interface ScheduleCard {
-  id: string
-  masterCardId: string
+  _id: string
+  habitId: string
+  userId: string
   day: DayOfWeek
-  startHour: number // 0-23
-  startMinute: number // 0-59
+  startHour: number
+  startMinute: number
   durationMinutes: number
 }
 
 // Drag state for drag-and-drop operations
 export interface DragState {
   type: "palette" | "move" | "resize-vertical" | "resize-horizontal-left" | "resize-horizontal-right"
-  masterCardId?: string
+  habitId?: string
   cardId?: string
   startDay?: DayOfWeek
   startHour?: number
@@ -77,18 +70,6 @@ export const CARD_COLORS = [
   { name: "Violet", value: "oklch(0.55 0.18 280)" },
   { name: "Pink", value: "oklch(0.60 0.18 340)" },
 ] as const
-
-// Default master cards
-export const DEFAULT_MASTER_CARDS: MasterCard[] = [
-  { id: "work", name: "Work", color: CARD_COLORS[6].value, defaultDurationMinutes: 120 },
-  { id: "gym", name: "Gym", color: CARD_COLORS[4].value, defaultDurationMinutes: 60 },
-  { id: "lunch", name: "Lunch", color: CARD_COLORS[3].value, defaultDurationMinutes: 60 },
-  { id: "meeting", name: "Meeting", color: CARD_COLORS[7].value, defaultDurationMinutes: 60 },
-  { id: "focus", name: "Focus Time", color: CARD_COLORS[5].value, defaultDurationMinutes: 90 },
-  { id: "break", name: "Break", color: CARD_COLORS[0].value, defaultDurationMinutes: 30 },
-  { id: "commute", name: "Commute", color: CARD_COLORS[8].value, defaultDurationMinutes: 45 },
-  { id: "personal", name: "Personal", color: CARD_COLORS[2].value, defaultDurationMinutes: 60 },
-]
 
 // Utility functions
 export function minutesToHoursMinutes(minutes: number): { hours: number; mins: number } {
@@ -148,7 +129,7 @@ export function getCardEndTime(card: ScheduleCard): { hour: number; minute: numb
 
 export function cardsOverlap(card1: ScheduleCard, card2: ScheduleCard): boolean {
   if (card1.day !== card2.day) return false
-  if (card1.id === card2.id) return false
+  if (card1._id === card2._id) return false
 
   const start1 = card1.startHour * 60 + card1.startMinute
   const end1 = start1 + card1.durationMinutes

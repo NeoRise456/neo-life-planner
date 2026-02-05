@@ -36,7 +36,7 @@ import {
 import { useHabitsContext } from "./habits-provider"
 import { IconPicker } from "./icon-picker"
 import { useMutation, useQuery } from "convex/react"
-import { api, Id } from "@/convex/_generated/api"
+import { api } from "@/convex/_generated/api"
 
 const CARD_COLORS = [
   { name: "Slate", value: "oklch(0.55 0.02 260)" },

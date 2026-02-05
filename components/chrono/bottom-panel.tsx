@@ -20,16 +20,16 @@ interface HabitWithScheduleCard {
 }
 
 function PaletteCard({ habit, isSelected, onSelect }: { habit: HabitWithScheduleCard; isSelected: boolean; onSelect: (habit: HabitWithScheduleCard) => void }) {
-  const { state } = useChrono()
+  const { editMode } = useChrono()
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
-    if (state.editMode !== "edit") {
+    if (editMode !== "edit") {
       e.preventDefault()
       return
     }
     e.dataTransfer.setData("habitId", habit._id)
     e.dataTransfer.effectAllowed = "copy"
-  }, [habit._id, state.editMode])
+  }, [habit._id, editMode])
 
   const handleClick = useCallback(() => {
     onSelect(habit)
@@ -37,12 +37,12 @@ function PaletteCard({ habit, isSelected, onSelect }: { habit: HabitWithSchedule
 
   return (
     <div
-      draggable={state.editMode === "edit"}
+      draggable={editMode === "edit"}
       onDragStart={handleDragStart}
       onClick={handleClick}
       className={cn(
         "flex items-center gap-3 p-3 border border-border bg-card hover:bg-accent/50 transition-colors group cursor-pointer",
-        state.editMode === "edit" && "cursor-grab active:cursor-grabbing",
+        editMode === "edit" && "cursor-grab active:cursor-grabbing",
         isSelected && "ring-2 ring-foreground ring-inset"
       )}
       role="listitem"
@@ -59,7 +59,7 @@ function PaletteCard({ habit, isSelected, onSelect }: { habit: HabitWithSchedule
 }
 
 function CardCollection() {
-  const { state, selectCard } = useChrono()
+  const { editMode, selectCard } = useChrono()
   const [selectedHabitId, setSelectedHabitId] = useState<string | null>(null)
 
   const habits = useQuery(api.habits.getAllHabits) ?? []
@@ -111,7 +111,7 @@ function CardCollection() {
             </div>
           )}
 
-          {state.editMode === "edit" && habits.length > 0 && (
+          {editMode === "edit" && habits.length > 0 && (
             <p className="text-[10px] text-muted-foreground mt-3 text-center font-display">
               Drag cards to timetable or right-click a time slot
             </p>
@@ -123,10 +123,10 @@ function CardCollection() {
 }
 
 function CardInfo() {
-  const { state, scheduleCards, updateScheduleCard, deleteScheduleCard } = useChrono()
+  const { editMode, selectedCardId, scheduleCards, updateScheduleCard, deleteScheduleCard } = useChrono()
 
-  const selectedScheduleCard = state.selectedCardId
-    ? scheduleCards.find((c) => c.id === state.selectedCardId)
+  const selectedScheduleCard = selectedCardId
+    ? scheduleCards.find((c) => c._id === selectedCardId)
     : null
 
   const habit = selectedScheduleCard
@@ -150,11 +150,11 @@ function CardInfo() {
               </h4>
             </div>
           </div>
-          {state.editMode === "edit" && (
+          {editMode === "edit" && (
             <Button
               variant="outline"
               size="icon-sm"
-              onClick={() => deleteScheduleCard(selectedScheduleCard.id)}
+              onClick={() => deleteScheduleCard(selectedScheduleCard._id)}
               className="text-destructive hover:bg-destructive/10 flex-shrink-0"
               aria-label={`Delete ${habit.name}`}
             >
@@ -175,7 +175,7 @@ function CardInfo() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-[10px] text-muted-foreground font-display uppercase mb-1">Start Time</p>
-                {state.editMode === "edit" ? (
+                {editMode === "edit" ? (
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
@@ -210,11 +210,11 @@ function CardInfo() {
                   {formatTime(endTime.hour, endTime.minute)}
                 </p>
               </div>
-            </div>
+              </div>
 
             <div>
               <p className="text-[10px] text-muted-foreground font-display uppercase mb-1">Duration</p>
-              {state.editMode === "edit" ? (
+              {editMode === "edit" ? (
                 <div className="flex items-center gap-2">
                   <input
                     type="number"

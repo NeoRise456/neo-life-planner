@@ -18,9 +18,9 @@ interface HabitItemProps {
   habit: {
     _id: any
     name: string
-    description: string | undefined
+    description?: string
     color: string
-    icon: string | undefined
+    icon?: string
     targetCount: number
     isTracked: boolean
   }

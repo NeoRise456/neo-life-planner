@@ -115,9 +115,9 @@ function DayColumn({ day }: DayColumnProps) {
         {/* Schedule cards */}
         {cards.map((card) => (
           <ScheduleCard
-            key={card.id}
+            key={card._id}
             card={card}
-            isSelected={selectedCardId === card.id}
+            isSelected={selectedCardId === card._id}
           />
         ))}
       </div>
