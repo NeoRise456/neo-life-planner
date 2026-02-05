@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { cn } from "@/lib/utils"
@@ -14,12 +14,11 @@ interface HabitWithScheduleCard {
   name: string
   color: string
   icon: string | undefined
-  defaultDurationMinutes: number
   isTracked: boolean
   frequency: string
 }
 
-function PaletteCard({ habit, isSelected, onSelect }: { habit: HabitWithScheduleCard; isSelected: boolean; onSelect: (habit: HabitWithScheduleCard) => void }) {
+function PaletteCard({ habit }: { habit: HabitWithScheduleCard }) {
   const { editMode } = useChrono()
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -31,43 +30,27 @@ function PaletteCard({ habit, isSelected, onSelect }: { habit: HabitWithSchedule
     e.dataTransfer.effectAllowed = "copy"
   }, [habit._id, editMode])
 
-  const handleClick = useCallback(() => {
-    onSelect(habit)
-  }, [habit, onSelect])
-
   return (
     <div
       draggable={editMode === "edit"}
       onDragStart={handleDragStart}
-      onClick={handleClick}
       className={cn(
-        "flex items-center gap-3 p-3 border border-border bg-card hover:bg-accent/50 transition-colors group cursor-pointer",
-        editMode === "edit" && "cursor-grab active:cursor-grabbing",
-        isSelected && "ring-2 ring-foreground ring-inset"
+        "flex items-center gap-3 p-3 border border-border bg-card hover:bg-accent/50 transition-colors group",
+        editMode === "edit" && "cursor-grab active:cursor-grabbing"
       )}
       role="listitem"
-      aria-label={`${habit.name} - ${formatDuration(habit.defaultDurationMinutes)}`}
-      aria-selected={isSelected}
+      aria-label={habit.name}
     >
       <div className="w-4 h-4 flex-shrink-0" style={{ backgroundColor: habit.color }} aria-hidden="true" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate font-display">{habit.name}</p>
-        <p className="text-[10px] text-muted-foreground font-display">{formatDuration(habit.defaultDurationMinutes)}</p>
-      </div>
+      <p className="text-sm font-medium truncate font-display flex-1">{habit.name}</p>
     </div>
   )
 }
 
 function CardCollection() {
-  const { editMode, selectCard } = useChrono()
-  const [selectedHabitId, setSelectedHabitId] = useState<string | null>(null)
+  const { editMode } = useChrono()
 
-  const habits = useQuery(api.habits.getAllHabits) ?? []
-
-  const handleSelect = useCallback((habit: HabitWithScheduleCard) => {
-    setSelectedHabitId(habit._id)
-    selectCard(habit._id)
-  }, [selectCard])
+  const habits = useQuery(api.habits.getHabits) ?? []
 
   return (
     <div className="flex-1 flex flex-col border-r border-border min-w-0">
@@ -104,8 +87,6 @@ function CardCollection() {
                 <PaletteCard
                   key={habit._id}
                   habit={habit as HabitWithScheduleCard}
-                  isSelected={selectedHabitId === habit._id}
-                  onSelect={handleSelect}
                 />
               ))}
             </div>
@@ -129,9 +110,10 @@ function CardInfo() {
     ? scheduleCards.find((c) => c._id === selectedCardId)
     : null
 
-  const habit = selectedScheduleCard
-    ? useQuery(api.habits.getHabitById, { id: selectedScheduleCard.habitId as any })
-    : null
+  const habit = useQuery(
+    api.habits.getHabitById,
+    selectedScheduleCard ? { id: selectedScheduleCard.habitId as any } : "skip"
+  )
 
   if (selectedScheduleCard && habit) {
     const endTime = getCardEndTime(selectedScheduleCard)
@@ -265,7 +247,7 @@ function CardInfo() {
       </div>
       <div className="flex-1 flex items-center justify-center p-4">
         <p className="text-xs text-muted-foreground font-display text-center">
-          Select a card from collection or timetable to view its details
+          Select a scheduled card from the timetable to view its details
         </p>
       </div>
     </div>

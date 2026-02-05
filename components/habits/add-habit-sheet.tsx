@@ -49,7 +49,6 @@ const createHabitSchema = z.object({
   targetDaysPerWeek: z.number().min(1).max(7).optional(),
   targetCount: z.number().min(1),
   isTracked: z.boolean(),
-  defaultDurationMinutes: z.number().min(15).max(720),
 })
 
 type CreateHabitForm = z.infer<typeof createHabitSchema>
@@ -69,7 +68,6 @@ export function AddHabitSheet() {
       targetDaysPerWeek: 3,
       targetCount: 1,
       isTracked: true,
-      defaultDurationMinutes: 60,
     },
   })
 
@@ -88,7 +86,6 @@ export function AddHabitSheet() {
         targetDaysPerWeek: data.frequency === "weekly" ? data.targetDaysPerWeek : undefined,
         targetCount: data.targetCount,
         isTracked: data.isTracked,
-        defaultDurationMinutes: data.defaultDurationMinutes,
       })
 
       await convex.mutation(api.habits.createDefaultHabits)
@@ -203,18 +200,6 @@ export function AddHabitSheet() {
             <p className="text-xs text-muted-foreground font-display">
               How many times per day
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="defaultDurationMinutes">Default Duration (minutes)</Label>
-            <Input
-              id="defaultDurationMinutes"
-              type="number"
-              min={15}
-              max={720}
-              {...form.register("defaultDurationMinutes", { valueAsNumber: true })}
-              className="font-display"
-            />
           </div>
 
           <div className="flex items-center space-x-3">

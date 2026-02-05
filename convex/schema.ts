@@ -29,7 +29,7 @@ export default defineSchema({
     targetDaysPerWeek: v.optional(v.number()),
     targetCount: v.number(),
     isTracked: v.boolean(),
-    defaultDurationMinutes: v.number(),
+    defaultDurationMinutes: v.optional(v.number()),
     userId: v.string(),
     createdAt: v.number(),
     isArchived: v.boolean(),

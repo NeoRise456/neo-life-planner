@@ -28,7 +28,7 @@ export const createHabit = mutation({
     targetDaysPerWeek: v.optional(v.number()),
     targetCount: v.number(),
     isTracked: v.boolean(),
-    defaultDurationMinutes: v.number(),
+    defaultDurationMinutes: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await ctx.auth.getUserIdentity();

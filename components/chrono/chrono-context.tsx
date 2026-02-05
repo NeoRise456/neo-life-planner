@@ -39,7 +39,7 @@ const ChronoContext = createContext<ChronoContextValue | null>(null)
 
 // Provider component
 export function ChronoProvider({ children }: { children: ReactNode }) {
-  const habits = useQuery(api.habits.getAllHabits) ?? []
+  const habits = useQuery(api.habits.getHabits) ?? []
   const convexScheduleCards = useQuery(api.scheduleCards.getScheduleCards) ?? []
   const updateScheduleCardMutation = useMutation(api.scheduleCards.updateScheduleCard)
   const createScheduleCardMutation = useMutation(api.scheduleCards.createScheduleCard)
@@ -49,6 +49,11 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
   const [editMode, setEditModeInternal] = useState<EditMode>("view")
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [dragState, setDragState] = useState<DragState | null>(null)
+
+  const validScheduleCards = convexScheduleCards.filter((card) => {
+    const habit = habits.find((h) => h._id === card.habitId)
+    return habit != null
+  })
 
   const toggleEditMode = useCallback(() => {
     setEditModeInternal((prev) => (prev === "view" ? "edit" : "view"))
@@ -63,8 +68,10 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
       const habit = habits.find((h) => h._id === habitId)
       if (!habit) return
 
+      const DEFAULT_DURATION_MINUTES = 60
+
       // Check for overlaps
-      const hasOverlap = convexScheduleCards.some((existing) => {
+      const hasOverlap = validScheduleCards.some((existing) => {
         const newCard: GeneratedScheduleCard = {
           _id: "new-card-temp",
           habitId: habit._id,
@@ -72,7 +79,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
           day,
           startHour,
           startMinute,
-          durationMinutes: habit.defaultDurationMinutes,
+          durationMinutes: DEFAULT_DURATION_MINUTES,
         }
         return cardsOverlap(existing as GeneratedScheduleCard, newCard)
       })
@@ -84,10 +91,10 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
         day,
         startHour,
         startMinute,
-        durationMinutes: habit.defaultDurationMinutes,
+        durationMinutes: DEFAULT_DURATION_MINUTES,
       })
     },
-    [habits, convexScheduleCards, createScheduleCardMutation]
+    [habits, validScheduleCards, createScheduleCardMutation]
   )
 
   const updateScheduleCard = useCallback(
@@ -98,7 +105,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
       }
 
       // Check for overlaps with other cards (not itself)
-      const hasOverlap = convexScheduleCards.some(
+      const hasOverlap = validScheduleCards.some(
         (existing) => existing._id !== card._id && cardsOverlap(existing as GeneratedScheduleCard, cardWithClampedDuration)
       )
 
@@ -112,7 +119,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
         durationMinutes: cardWithClampedDuration.durationMinutes,
       })
     },
-    [convexScheduleCards, updateScheduleCardMutation]
+    [validScheduleCards, updateScheduleCardMutation]
   )
 
   const deleteScheduleCard = useCallback(
@@ -127,7 +134,7 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
 
   const duplicateCardToDay = useCallback(
     async (cardId: string, targetDay: DayOfWeek) => {
-      const card = convexScheduleCards.find((c) => c._id === cardId)
+      const card = validScheduleCards.find((c) => c._id === cardId)
       if (!card) return
 
       try {
@@ -136,20 +143,20 @@ export function ChronoProvider({ children }: { children: ReactNode }) {
         // Card already exists
       }
     },
-    [convexScheduleCards, duplicateToDayMutation]
+    [validScheduleCards, duplicateToDayMutation]
   )
 
   const getCardsForDay = useCallback(
     (day: DayOfWeek) =>
-      (convexScheduleCards as GeneratedScheduleCard[])
+      (validScheduleCards as GeneratedScheduleCard[])
         .filter((card) => card.day === day)
         .sort((a, b) => a.startHour * 60 + a.startMinute - (b.startHour * 60 + b.startMinute)),
-    [convexScheduleCards]
+    [validScheduleCards]
   )
 
   const value: ChronoContextValue = {
     habits,
-    scheduleCards: convexScheduleCards as GeneratedScheduleCard[],
+    scheduleCards: validScheduleCards as GeneratedScheduleCard[],
     selectedCardId,
     editMode,
     dragState,

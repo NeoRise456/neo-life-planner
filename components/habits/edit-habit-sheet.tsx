@@ -59,7 +59,6 @@ const editHabitSchema = z.object({
   targetDaysPerWeek: z.number().min(1).max(7).optional(),
   targetCount: z.number().min(1),
   isTracked: z.boolean(),
-  defaultDurationMinutes: z.number().min(15).max(720),
 })
 
 type EditHabitForm = z.infer<typeof editHabitSchema>
@@ -87,7 +86,6 @@ export function EditHabitSheet() {
       targetDaysPerWeek: 3,
       targetCount: 1,
       isTracked: true,
-      defaultDurationMinutes: 60,
     },
   })
 
@@ -105,7 +103,6 @@ export function EditHabitSheet() {
         targetDaysPerWeek: habit.targetDaysPerWeek ?? 3,
         targetCount: habit.targetCount,
         isTracked: habit.isTracked,
-        defaultDurationMinutes: habit.defaultDurationMinutes,
       })
     }
   }, [habit, reset])
@@ -124,7 +121,6 @@ export function EditHabitSheet() {
         targetDaysPerWeek: data.frequency === "weekly" ? data.targetDaysPerWeek : undefined,
         targetCount: data.targetCount,
         isTracked: data.isTracked,
-        defaultDurationMinutes: data.defaultDurationMinutes,
       })
 
       closeEditSheet()
@@ -247,18 +243,6 @@ export function EditHabitSheet() {
                 type="number"
                 min={1}
                 {...form.register("targetCount", { valueAsNumber: true })}
-                className="font-display"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="defaultDurationMinutes">Default Duration (minutes)</Label>
-              <Input
-                id="defaultDurationMinutes"
-                type="number"
-                min={15}
-                max={720}
-                {...form.register("defaultDurationMinutes", { valueAsNumber: true })}
                 className="font-display"
               />
             </div>

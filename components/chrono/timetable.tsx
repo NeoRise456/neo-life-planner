@@ -51,8 +51,8 @@ function DayColumn({ day }: DayColumnProps) {
     (e: React.DragEvent) => {
       e.preventDefault()
 
-      const masterCardId = e.dataTransfer.getData("masterCardId")
-      if (!masterCardId || !columnRef.current) return
+      const habitId = e.dataTransfer.getData("habitId")
+      if (!habitId || !columnRef.current) return
 
       const rect = columnRef.current.getBoundingClientRect()
       const y = e.clientY - rect.top
@@ -60,7 +60,7 @@ function DayColumn({ day }: DayColumnProps) {
       const hour = Math.floor(totalMinutes / 60)
       const minute = totalMinutes % 60 >= 30 ? 30 : 0
 
-      addScheduleCard(masterCardId, day, hour, minute)
+      addScheduleCard(habitId, day, hour, minute)
     },
     [day, addScheduleCard]
   )
